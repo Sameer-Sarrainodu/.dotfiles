@@ -7,7 +7,7 @@ local plugins = {
 		"nvim-lua/plenary.nvim",
 		lazy = false, -- always loaded
 	},
-	-- 2️⃣ Web Dev Icons
+	-- 2️⃣ Web Devv Icons
 	{
 		"nvim-tree/nvim-web-devicons",
 		lazy = false, -- always loaded, because many plugins depend on it
@@ -120,14 +120,6 @@ local plugins = {
 		end,
 	},
 
-	-- Conform (formatter/linter)
-	{
-		"stevearc/conform.nvim",
-		lazy = false,
-		config = function()
-			require("plugins.core.conform")
-		end,
-	},
 	-- lspkind
 	{
 		"onsails/lspkind.nvim",
@@ -261,6 +253,14 @@ local plugins = {
 			require("plugins.productivity.code_runner")
 		end,
 	},
+	-- nonels
+	{
+		"nvimtools/none-ls.nvim",
+		dependencies = { "nvim-lua/plenary.nvim" },
+		config = function()
+			require("plugins.core.none-ls")
+		end, -- ✅ This comma is fine if more entries follow
+	}, -- ✅ Make sure the table closes correctly
 }
 -- -- Merge themes into main plugin table
 local themes = require("plugins.themes")

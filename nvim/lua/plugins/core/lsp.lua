@@ -24,6 +24,10 @@ end
 -- Runs when LSP attaches to a buffer
 -- =====================================================
 local on_attach = function(client, bufnr)
+	-- 👇 Disable LSP formatting so Conform takes over
+
+		client.server_capabilities.documentFormattingProvider = false
+		client.server_capabilities.documentRangeFormattingProvider = false
 	local map = function(mode, lhs, rhs, desc)
 		vim.keymap.set(mode, lhs, rhs, { buffer = bufnr, desc = desc })
 	end
