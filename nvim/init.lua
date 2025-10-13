@@ -1,43 +1,73 @@
--- Bootstrap Lazy.nvim
+-- =====================================================
+-- INIT.LUA
+-- Minimal Bootstrap + Config Loader
+-- =====================================================
+
+-- Folder structure:
+-- ~/.config/nvim/
+-- ├── init.lua                # This bootstrap file
+-- ├── lua/
+-- │   ├── config/             # General Neovim configs
+-- │   │   ├── settings.lua
+-- │   │   ├── keymaps.lua
+-- │   │   └── autocmds.lua
+-- │   ├── plugins.lua         # Main plugin loader (Lazy.nvim)
+-- │   └── plugins/            # Plugin-specific configs (modular)
+-- │       ├── core/
+-- │       │   ├── autopairs.lua
+-- │       │   ├── telescope.lua
+-- │       │   ├── lsp.lua
+-- │       │   └── mason.lua
+-- │       ├── productivity/
+-- │       │   ├── nvim-tree.lua
+-- │       │   ├── bufferline.lua
+-- │       │   ├── lualine.lua
+-- │       │   ├── treesitter.lua
+-- │       │   ├── which-key.lua
+-- │       │   ├── comment.lua
+-- │       │   └── todo-comments.lua
+-- │       └── developer/
+-- │           ├── cmp.lua
+-- │           ├── conform.lua
+-- │           ├── lazydev.lua
+-- │           ├── blink-extra.lua
+-- │           ├── dap.lua
+-- │           └── quickrun.lua
+-- └── ftplugin/
+--     ├── yaml.lua
+--     ├── terraform.lua
+--     └── bash.lua
+
+-- =====================================================
+-- 1️⃣ Bootstrap Lazy.nvim
+-- =====================================================
 local lazypath = vim.fn.stdpath("data") .. "/lazy/lazy.nvim"
 if not vim.loop.fs_stat(lazypath) then
-  vim.fn.system({
-    "git", "clone", "--filter=blob:none",
-    "https://github.com/folke/lazy.nvim.git", lazypath
-  })
+	vim.fn.system({
+		"git",
+		"clone",
+		"--filter=blob:none",
+		"https://github.com/folke/lazy.nvim.git",
+		lazypath,
+	})
 end
 vim.opt.rtp:prepend(lazypath)
 
-
-require("settings")
-require("keymaps")
+-- =====================================================
+-- 2️⃣ Load general Neovim configs
+-- =====================================================
+require("config.settings") -- Core options
+require("config.keymaps") -- Keymaps
+require("config.autocmds")
 require("plugins")
-require("lsp")
-require("autocmds")
+require("config.colorscheme")
 
--- Load bottom panel (after all plugins are loaded)
+-- =====================================================
+-- 3️⃣ Plugin setup (to be added later in plugins.lua)
+-- =====================================================
+-- Example: later you can require("plugins") here to setup Lazy.nvim plugins
+-- require("plugins")
 
---[[
-~/.dotfiles/nvim/
-├── init.lua              # Bootstrap (loads settings, keymaps, plugins, theme)
-├── lua/
-│   ├── settings.lua      # Core Neovim options
-│   ├── keymaps.lua       # Custom key mappings
-│   ├── plugins.lua       # Plugin manager (lazy.nvim)
-│   ├── lsp.lua           # LSP + completion setup
-│   ├── theme.lua         # Colorscheme setup
-│   └── plugins-config/   # Modular plugin configs
-│       ├── nvim-tree.lua
-│       ├── telescope.lua
-│       ├── lualine.lua
-│       ├── treesitter.lua
-│       ├── cmp.lua
-│       └── autopairs.lua
-└── ftplugin/             # Filetype-specific configs (YAML, Terraform, etc.)
-    ├── yaml.lua
-    ├── terraform.lua
-    └── bash.lua
-
-]]
-
-
+-- =====================================================
+-- End of init.lua
+-- =====================================================

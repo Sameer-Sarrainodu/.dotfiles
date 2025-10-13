@@ -1,219 +1,286 @@
-
--- lua/plugins.lua
+-- ~/.config/nvim/lua/plugins.lua
+-- Main Lazy.nvim plugin loader
 
 local plugins = {
-    -- autopairs
-    {
-        "windwp/nvim-autopairs",
-        lazy = false,
-        config = function()
-            require("plugins-config.autopairs")
-        end,
-    },
+	-- 1️⃣ Plenary (core dependency for many plugins)
+	{
+		"nvim-lua/plenary.nvim",
+		lazy = false, -- always loaded
+	},
+	-- 2️⃣ Web Dev Icons
+	{
+		"nvim-tree/nvim-web-devicons",
+		lazy = false, -- always loaded, because many plugins depend on it
+		default = true,
+	},
+	-- 🪵 Neo-tree (modern file explorer)
+	{
+		"nvim-neo-tree/neo-tree.nvim",
+		branch = "v3.x",
+		dependencies = {
+			"nvim-lua/plenary.nvim",
+			"nvim-tree/nvim-web-devicons",
+			"MunifTanjim/nui.nvim",
+		},
+		config = function()
+			require("plugins.core.neo-tree")
+		end,
+	},
+	-- bufferline
+	{
+		"akinsho/bufferline.nvim",
+		dependencies = { "nvim-tree/nvim-web-devicons" },
+		version = "*",
+		config = function()
+			require("plugins.core.bufferline")
+		end,
+	},
 
-    -- telescope
-    {
-        "nvim-telescope/telescope.nvim",
-        dependencies = { "nvim-lua/plenary.nvim" },
-        config = function()
-            require("plugins-config.telescope")
-        end,
-    },
+	-- Lualine.nvim (statusline)
+	{
+		"nvim-lualine/lualine.nvim",
+		lazy = false,
+		dependencies = { "nvim-tree/nvim-web-devicons" },
+		config = function()
+			require("plugins.core.lualine")
+		end,
+	},
 
-    -- bufferline
-    {
-        "akinsho/bufferline.nvim",
-        lazy = false,
-        dependencies = "nvim-tree/nvim-web-devicons",
-        config = function()
-            require("plugins-config.bufferline")  -- call the separate config
-        end,
-    },
+	-- Treesitter for syntax highlighting and textobjects
+	{
+		"nvim-treesitter/nvim-treesitter",
+		build = ":TSUpdate",
+		lazy = false,
+		event = { "BufReadPost", "BufNewFile" },
+		dependencies = {
+			"nvim-treesitter/nvim-treesitter-textobjects",
+			{
+				"nvim-treesitter/playground",
+				cmd = "TSPlaygroundToggle",
+			},
+		},
 
-    -- nvim tree
-    {
-        "nvim-tree/nvim-tree.lua",
-        lazy = false,
-        dependencies = { "nvim-tree/nvim-web-devicons" },
-        -- Load the plugin only when these commands are called
-        cmd = { "NvimTreeToggle", "NvimTreeFocus" },
-        config = function()
-            require("plugins-config.nvim-tree")  -- call the separate config
-        end,
-    },
+		config = function()
+			require("plugins.core.treesitter")
+		end,
+	},
 
-    -- toggle term
-    {
-        "akinsho/toggleterm.nvim",
-        version = "*",
-        lazy = false,
-        config = function()
-            require("plugins-config.toggleterm")  -- call the separate config
-        end,
-    },
+	-- Telescope.nvim (fuzzy finder)
+	{
+		"nvim-telescope/telescope.nvim",
+		lazy = false, -- load immediately for keymaps/commands
+		dependencies = { "nvim-lua/plenary.nvim" },
+		config = function()
+			require("plugins.core.telescope")
+		end,
+	},
+	-- Mason.nvim (LSP / linter / formatter installer)
+	{
+		"williamboman/mason.nvim",
+		lazy = false, -- load immediately so :Mason works
+		config = function()
+			require("plugins.core.mason")
+		end,
+	},
+	-- Mason LSP config helper
+	{
+		"williamboman/mason-lspconfig.nvim",
+		lazy = false, -- load immediately with mason
+		dependencies = { "williamboman/mason.nvim" },
+		config = function()
+			require("plugins.core.mason-lspconfig")
+		end,
+	},
+	-- nvim-lspconfig (connects Neovim with installed LSP servers)
+	{
+		"neovim/nvim-lspconfig",
+		lazy = false,
+		dependencies = { "williamboman/mason.nvim", "williamboman/mason-lspconfig.nvim" },
+		config = function()
+			require("plugins.core.lsp")
+		end,
+	},
+	-- lspsaga
+	{
+		"glepnir/lspsaga.nvim",
+		branch = "main",
+		event = "LspAttach",
+		dependencies = { "nvim-tree/nvim-web-devicons" },
+		config = function()
+			require("plugins.core.lspsaga")
+		end,
+	},
+	-- nvim-cmp + LuaSnip
+	{
+		"hrsh7th/nvim-cmp",
+		dependencies = { "hrsh7th/cmp-nvim-lsp", "L3MON4D3/LuaSnip", "rafamadriz/friendly-snippets" },
+		event = "InsertEnter",
+		config = function()
+			require("plugins.core.cmp")
+		end,
+	},
 
-    -- lualine
-    {
-        "nvim-lualine/lualine.nvim",
-        lazy = false,
-        dependencies = { "nvim-tree/nvim-web-devicons" },
-        config = function()
-            require("plugins-config.lualine")  -- call the separate config
-        end,
-    },
+	-- Conform (formatter/linter)
+	{
+		"stevearc/conform.nvim",
+		lazy = false,
+		config = function()
+			require("plugins.core.conform")
+		end,
+	},
+	-- lspkind
+	{
+		"onsails/lspkind.nvim",
+		lazy = false,
+	},
 
-    -- treesitter
-    {
-        "nvim-treesitter/nvim-treesitter",
-        version = false,
-        build = ":TSUpdate",
-        event = { "BufReadPost", "BufNewFile" },
-        dependencies = {
-            "nvim-treesitter/nvim-treesitter-textobjects",
-        },
-        config = function()
-            require("plugins-config.treesitter")
-        end,
-    },
+	-- nvim-dap
+	{
+		"mfussenegger/nvim-dap",
+		keys = {
+			{
+				"<F5>",
+				function()
+					require("dap").continue()
+				end,
+				desc = "DAP Continue",
+			},
+			{
+				"<F10>",
+				function()
+					require("dap").step_over()
+				end,
+				desc = "Step Over",
+			},
+			{
+				"<F11>",
+				function()
+					require("dap").step_into()
+				end,
+				desc = "Step Into",
+			},
+			{
+				"<F12>",
+				function()
+					require("dap").step_out()
+				end,
+				desc = "Step Out",
+			},
+			{
+				"<leader>b",
+				function()
+					require("dap").toggle_breakpoint()
+				end,
+				desc = "Toggle Breakpoint",
+			},
+		},
+		config = function()
+			require("plugins.core.dap")
+		end,
+	},
 
-    -- which key
-    {
-        "folke/which-key.nvim",
-        lazy = false,
-        config = function()
-            require("plugins-config.which-key")  -- call the separate config
-        end,
-    },
+	-- nvim-dap-ui
+	{
+		"rcarriga/nvim-dap-ui",
+		dependencies = { "mfussenegger/nvim-dap", "nvim-neotest/nvim-nio" },
+		lazy = true,
+		config = function()
+			require("plugins.core.dap-ui")
+		end,
+	},
+	-- nvim nio
+	{
+		"nvim-neotest/nvim-nio",
+		lazy = false, -- core plugin, loaded immediately
+	},
 
-    -- trouble
-    {
-        "folke/trouble.nvim",
-        cmd = "Trouble",
-        dependencies = { "nvim-tree/nvim-web-devicons", "nvim-telescope/telescope.nvim" },
-        config = function()
-            require("plugins-config.trouble")  -- call the separate config
-        end,
-    },
+	-- gitsigns.nvim
+	{
+		"lewis6991/gitsigns.nvim",
+		lazy = false,
+		config = function()
+			require("plugins.core.gitsigns")
+		end,
+	},
 
-    -- comment
-    {
-        "numToStr/Comment.nvim",
-        lazy = false,
-        config = function()
-            require("plugins-config.comment")  -- call the separate config
-        end,
-    },
+	--autopairs
+	{
+		"windwp/nvim-autopairs",
+		lazy = false,
+		config = function()
+			require("plugins.productivity.autopairs")
+		end,
+	},
 
-    -- todo
-    {
-        "folke/todo-comments.nvim",
-        dependencies = "nvim-lua/plenary.nvim",
-        lazy = true,
-        event = "BufReadPost",  -- load after opening a file
-        config = function()
-            require("plugins-config.todo-comments")  -- call the separate config
-        end,
-    },
+	-- comment
+	{
+		"numToStr/Comment.nvim",
+		lazy = false,
+		config = function()
+			require("plugins.productivity.comment")
+		end,
+	},
+	--neoscroll
+	{
+		"karb94/neoscroll.nvim",
+		lazy = false,
+		config = function()
+			require("plugins.productivity.neoscroll")
+		end,
+	},
+	-- vim-sneak
+	{
+		"justinmk/vim-sneak",
+		lazy = false,
+	},
+	{
+		"akinsho/toggleterm.nvim",
+		version = "*",
+		config = function()
+			require("plugins.productivity.toggleterm")
+		end,
+	},
+	-- trouble
 
-    -- mason
-    {
-        "williamboman/mason.nvim",
-        lazy = false,  -- always loaded
-        config = function()
-            require("plugins-config.mason")  -- call the separate config
-        end,
-    },
-
-
-    -- blink
-    {
-        "saghen/blink.cmp",
-        version ="1.*",
-        dependencies = { "L3MON4D3/LuaSnip", "rafamadriz/friendly-snippets" },
-        config = function()
-            require("plugins-config.cmp")()
-        end,
-    },
-
-    -- conform
-    {
-        "stevearc/conform.nvim",
-        lazy = false,
-        config = function()
-            require("plugins-config.conform")()
-        end,
-    },
-    -- LazyDev (Lua enhancements)
-    {
-        "folke/lazydev.nvim",
-        ft = "lua",
-        config = function()
-            require("plugins-config.lazydev")
-        end,
-    },
-
-    -- Blink extra config (with LazyDev integration)
-    {
-        "saghen/blink.cmp",
-        config = function()
-            require("plugins-config.blink-extra")
-        end,
-    },
-
-    -- colorscheme
-    {
-        "sainnhe/gruvbox-material",
-        lazy = false,
-        priority = 1000,
-        config = function()
-            require("plugins-config.colorscheme")
-        end,
-    },
-
-    -- quickrun
-    {
-        "thinca/vim-quickrun",
-        lazy = false,
-        cmd = "QuickRun",  -- lazy-load on command
-        keys = {
-{ "<leader>rr", "<cmd>QuickRun<cr>", desc = "Quick Run Current File" },
-        },
-        config = function()
-            require("plugins-config.quickrun")
-        end,
-    },
-
-    -- DAP (debugging)
-    {
-        "mfussenegger/nvim-dap",
-        lazy = true,
-        config = function()
-          require("plugins-config.dap")
-        end
-    },
-
-    
-
-
-    
-
-
-    
-
+	{
+		"folke/trouble.nvim",
+		dependencies = "nvim-tree/nvim-web-devicons",
+		config = function()
+			require("plugins.productivity.trouble")
+		end,
+		keys = {
+			{ "<leader>xx", "<cmd>Trouble toggle<cr>", desc = "Toggle Trouble" },
+			{ "<leader>xX", "<cmd>TroubleToggle<cr>", desc = "Buffer Diagnostics Trouble" },
+		},
+		cmd = "Trouble",
+	},
+	-- coderunner
+	{
+		"CRAG666/code_runner.nvim",
+		config = function()
+			require("plugins.productivity.code_runner")
+		end,
+	},
 }
+-- -- Merge themes into main plugin table
+local themes = require("plugins.themes")
+vim.list_extend(plugins, themes)
 
--- Setup Lazy.nvim with all plugins
-
+-- Setup Lazy.nvim
 require("lazy").setup(plugins, {
-    install = {
-        missing = true,
-        colorscheme = { "habamax" }
-    },
-    checker = { enabled = true, notify = false },
-    change_detection = { enabled = true, notify = false },
-    performance = {
-        rtp = {
-            disabled_plugins = { "gzip", "tarPlugin", "tohtml", "tutor", "zipPlugin" }
-        }
-    }
+	install = { missing = true },
+	checker = { enabled = true, notify = false },
+	performance = {
+		rtp = { disabled_plugins = { "gzip", "tarPlugin", "tohtml", "tutor", "zipPlugin" } },
+	},
+	ui = {
+		border = "rounded", -- options: "none", "single", "double", "rounded", "solid", "shadow"
+		size = {
+			width = 0.8, -- 80% of screen width
+			height = 0.8, -- 80% of screen height
+		},
+		win_options = {
+			winhighlight = "Normal:Normal,FloatBorder:Normal", -- border matches theme
+		},
+	},
 })
