@@ -260,7 +260,17 @@ local plugins = {
 		config = function()
 			require("plugins.core.none-ls")
 		end, -- ✅ This comma is fine if more entries follow
-	}, -- ✅ Make sure the table closes correctly
+	}, -- ✅ Make sure the table closcorrectly
+
+	-- indent-blank
+	{
+		"lukas-reineke/indent-blankline.nvim",
+		main = "ibl",
+		opts = {
+			indent = { char = "│" },
+			scope = { enabled = true },
+		},
+	},
 }
 -- -- Merge themes into main plugin table
 local themes = require("plugins.themes")
